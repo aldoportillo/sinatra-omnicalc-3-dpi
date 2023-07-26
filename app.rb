@@ -47,3 +47,7 @@ post("/process_umbrella"){
 
   erb(:umbrella_output)
 }
+
+get("/message"){
+  erb(:message)
+}
