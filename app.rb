@@ -6,3 +6,6 @@ get("/") do
 end
 
 
+get("/umbrella"){
+  erb(:umbrella)
+}
