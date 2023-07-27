@@ -13,15 +13,25 @@ get("/umbrella"){
 }
 
 post("/process_umbrella"){
+  # binding.irb
 
   @location = params.fetch("location").to_s
 
-  GMAPS_URI = "https://maps.googleapis.com/maps/api/geocode/json?address=#{@location}&key=#{ENV.fetch("GMAPS_KEY")}"
+  # option 1
+  # CGI.escape(@location)
+
+  # option 2
+  # create hash with query string keys/values and convert to query string
+
+
+  GMAPS_URI = "https://maps.googleapis.com/maps/api/geocode/json?address=#{CGI.escape(@location)}&key=#{ENV.fetch("GMAPS_KEY")}"
 
   gmaps_req = HTTP.get(GMAPS_URI)
 
   gmaps_res = JSON.parse(gmaps_req)
 
+  # location = gmaps_res.dig("results", 0, "geometry", "location")
+  # @lat, @lng = location.dig("lat"), location.dig("lng")
   @lat = gmaps_res.fetch("results").at(0).fetch("geometry").fetch("location").fetch("lat")
   @lng = gmaps_res.fetch("results").at(0).fetch("geometry").fetch("location").fetch("lng")
 
