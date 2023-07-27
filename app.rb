@@ -30,10 +30,10 @@ post("/process_umbrella"){
 
   gmaps_res = JSON.parse(gmaps_req)
 
-  # location = gmaps_res.dig("results", 0, "geometry", "location")
-  # @lat, @lng = location.dig("lat"), location.dig("lng")
-  @lat = gmaps_res.fetch("results").at(0).fetch("geometry").fetch("location").fetch("lat")
-  @lng = gmaps_res.fetch("results").at(0).fetch("geometry").fetch("location").fetch("lng")
+  location = gmaps_res.dig("results", 0, "geometry", "location")
+  @lat, @lng = location.dig("lat"), location.dig("lng")
+  # @lat = gmaps_res.fetch("results").at(0).fetch("geometry").fetch("location").fetch("lat")
+  # @lng = gmaps_res.fetch("results").at(0).fetch("geometry").fetch("location").fetch("lng")
 
   PIRATE_URI = "https://api.pirateweather.net/forecast/#{ENV.fetch("PIRATE_WEATHER_KEY")}/#{@lat},#{@lng}"
 
@@ -90,6 +90,8 @@ post("/process_single_message"){
   )
 
   @parsed_response = JSON.parse(raw_response)
+
+  @reply = @parsed_response.dig("choices", 0, "message", "content")
 
   erb(:message_result)
 }
