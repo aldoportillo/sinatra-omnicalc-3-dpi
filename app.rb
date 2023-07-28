@@ -101,7 +101,10 @@ get("/chat"){
 
 
   if (cookies["chat_history"] == nil)
-    cookies["chat_history"] = JSON.generate([])
+    @chat_history = []
+    cookies["chat_history"] = JSON.generate(@chat_history)
+  else
+    @chat_history = JSON.parse(cookies["chat_history"])
   end
 
 
@@ -136,11 +139,13 @@ post("/chat"){
 
   @chat_history = JSON.parse(cookies["chat_history"]) #is array
 
-  @parsed_response = JSON.parse(raw_response).dig("choices", 0, "message") #is hash
+  @parsed_response = JSON.parse(raw_response).dig("choices", 0, "message","content") #is hash
 
-  @chat_history.push({"role": "user", "content": @user_message})
-  @chat_history.push(@parsed_response)
+  @chat_history.push({"role" => "user", "content" => @user_message})
+  @chat_history.push({"role"=> "assistant", "content"=> @parsed_response})
   cookies["chat_history"] = JSON.generate(@chat_history)
+
+  
   
 
   erb(:chat)
