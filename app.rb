@@ -2,6 +2,7 @@ require "sinatra"
 require "sinatra/reloader"
 require "http"
 require "json"
+require "sinatra/cookies"
 
 get("/") do
   erb(:home)
@@ -70,7 +71,7 @@ post("/process_single_message"){
   request_headers_hash = {
   "Authorization" => "Bearer #{ENV.fetch("GPT_KEY")}",
   "content-type" => "application/json"
-}
+  }
 
   request_body_hash = {
     "model" => "gpt-3.5-turbo",
@@ -94,4 +95,53 @@ post("/process_single_message"){
   @reply = @parsed_response.dig("choices", 0, "message", "content")
 
   erb(:message_result)
+}
+
+get("/chat"){
+
+
+  if (cookies["chat_history"] == nil)
+    cookies["chat_history"] = JSON.generate([])
+  end
+
+
+  erb(:chat)
+}
+
+post("/chat"){
+
+  @user_message = params.fetch("user_input")
+
+  request_headers_hash = {
+    "Authorization" => "Bearer #{ENV.fetch("GPT_KEY")}",
+    "content-type" => "application/json"
+  }
+
+  request_body_hash = {
+    "model" => "gpt-3.5-turbo",
+    "messages": [
+    {
+      "role": "user",
+      "content": @user_message
+    }
+  ]
+  }
+
+  request_body_json = JSON.generate(request_body_hash)
+
+  raw_response = HTTP.headers(request_headers_hash).post(
+    "https://api.openai.com/v1/chat/completions",
+    :body => request_body_json
+  )
+
+  @chat_history = JSON.parse(cookies["chat_history"]) #is array
+
+  @parsed_response = JSON.parse(raw_response).dig("choices", 0, "message") #is hash
+
+  @chat_history.push({"role": "user", "content": @user_message})
+  @chat_history.push(@parsed_response)
+  cookies["chat_history"] = JSON.generate(@chat_history)
+  
+
+  erb(:chat)
 }
