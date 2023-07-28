@@ -150,3 +150,9 @@ post("/chat"){
 
   erb(:chat)
 }
+
+
+post("/clear_chat"){
+  cookies["chat_history"] = JSON.generate([])
+  redirect(:chat)
+}
